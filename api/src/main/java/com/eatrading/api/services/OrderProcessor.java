@@ -3,6 +3,8 @@ package com.eatrading.api.services;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.eatrading.api.entities.Client;
 import com.eatrading.api.entities.Order;
@@ -13,25 +15,75 @@ import com.eatrading.api.objects.OrderRequest;
 import com.eatrading.api.objects.OrderResponse;
 import com.eatrading.api.objects.Status;
 import com.eatrading.api.repository.ClientRepository;
+import com.eatrading.api.dto.Quote;
 
 @Service
 public class OrderProcessor {
     
+    private static final Logger logger = LoggerFactory.getLogger(OrderProcessor.class);
+    private static final double MAX_PRICE_VARIANCE_PERCENT = 5.0; // 5% variance tolerance
+    
     private final ClientRepository clientRepository;
+    private final QuoteService quoteService;
 
-    public OrderProcessor(ClientRepository clientRepository) {
+    public OrderProcessor(ClientRepository clientRepository, QuoteService quoteService) {
         this.clientRepository = clientRepository;
+        this.quoteService = quoteService;
     }
 
     private OrderResponse validateBuy(Order order) {
         OrderResponse resp = new OrderResponse();
-        resp.setStatusCode(Status.ACCEPTED);
+        try {
+            // Get current market price
+            Quote quote = quoteService.getQuote(order.getAsset().getSymbol());
+            double marketPrice = quote.getPrice();
+            double orderPrice = order.getPrice().doubleValue();
+            
+            // Check if order price is too far from market price
+            double variance = Math.abs((orderPrice - marketPrice) / marketPrice) * 100;
+            
+            if (variance > MAX_PRICE_VARIANCE_PERCENT) {
+                logger.warn("Buy order variance too high: {} vs market {}. Variance: {}%", 
+                    orderPrice, marketPrice, variance);
+                resp.setStatusCode(Status.REJECTED);
+                return resp;
+            }
+            
+            logger.info("Buy order validated. Order price: {}, Market price: {}, Variance: {}%", 
+                orderPrice, marketPrice, variance);
+            resp.setStatusCode(Status.ACCEPTED);
+        } catch (Exception e) {
+            logger.error("Error validating buy order: {}", e.getMessage());
+            resp.setStatusCode(Status.REJECTED);
+        }
         return resp;
     }
 
     private OrderResponse validateSell(Order order) {
         OrderResponse resp = new OrderResponse();
-        resp.setStatusCode(Status.ACCEPTED);
+        try {
+            // Get current market price
+            Quote quote = quoteService.getQuote(order.getAsset().getSymbol());
+            double marketPrice = quote.getPrice();
+            double orderPrice = order.getPrice().doubleValue();
+            
+            // Check if order price is too far from market price
+            double variance = Math.abs((orderPrice - marketPrice) / marketPrice) * 100;
+            
+            if (variance > MAX_PRICE_VARIANCE_PERCENT) {
+                logger.warn("Sell order variance too high: {} vs market {}. Variance: {}%", 
+                    orderPrice, marketPrice, variance);
+                resp.setStatusCode(Status.REJECTED);
+                return resp;
+            }
+            
+            logger.info("Sell order validated. Order price: {}, Market price: {}, Variance: {}%", 
+                orderPrice, marketPrice, variance);
+            resp.setStatusCode(Status.ACCEPTED);
+        } catch (Exception e) {
+            logger.error("Error validating sell order: {}", e.getMessage());
+            resp.setStatusCode(Status.REJECTED);
+        }
         return resp;
     }
 

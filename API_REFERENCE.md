@@ -1,0 +1,658 @@
+# EA Trading Backend API Reference
+
+## Base Configuration
+- **Base URL**: `http://10.23.137.152:8099`
+- **Port**: 8099
+- **Authentication**: None required
+- **CORS**: Enabled for all origins (*)
+
+---
+
+## Market Data Endpoints
+
+### Get Stock Quote
+```http
+GET /api/v1/market/quotes/{symbol}
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/v1/market/quotes/AAPL"
+```
+
+**Response:**
+```json
+{
+  "symbol": "AAPL",
+  "price": 338.4,
+  "bid": 338.36,
+  "ask": 338.44,
+  "asOf": "2026-09-28T20:00:01Z",
+  "change": -2.67,
+  "changePercent": -0.782830504002111,
+  "currency": "USD",
+  "marketState": "unknown",
+  "previousClose": 341.07,
+  "spreadBps": 1.8467
+}
+```
+
+---
+
+### Get Candles (OHLCV Data)
+```http
+GET /api/v1/market/candles/{symbol}?from=2026-09-01&to=2026-09-28
+```
+
+**Parameters:**
+- `symbol` (required): Stock ticker symbol
+- `from` (optional): Start date (YYYY-MM-DD), defaults to 30 days ago
+- `to` (optional): End date (YYYY-MM-DD), defaults to today
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/v1/market/candles/AAPL?from=2026-09-01&to=2026-09-28"
+```
+
+**Response:**
+```json
+{
+  "symbol": "AAPL",
+  "candles": [
+    {
+      "open": 340.0,
+      "high": 342.5,
+      "low": 338.2,
+      "close": 341.07,
+      "volume": 1000000,
+      "timestamp": "2026-09-28T00:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### Get Bid-Ask Spread
+```http
+GET /api/v1/market/spread/{symbol}
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/v1/market/spread/AAPL"
+```
+
+**Response:**
+```json
+{
+  "spread": 0.08,
+  "spreadBps": 1.8467
+}
+```
+
+---
+
+### Get Price Changes
+```http
+GET /api/v1/market/changes/{symbol}
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/v1/market/changes/AAPL"
+```
+
+**Response:**
+```json
+{
+  "change": -2.67,
+  "changePercent": -0.782830504002111,
+  "previousClose": 341.07
+}
+```
+
+---
+
+### Get Current Price
+```http
+GET /api/v1/market/price/{symbol}
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/v1/market/price/AAPL"
+```
+
+**Response:**
+```json
+{
+  "symbol": "AAPL",
+  "price": 338.4
+}
+```
+
+---
+
+### Market API Health
+```http
+GET /api/v1/market/health
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/v1/market/health"
+```
+
+**Response:**
+```
+"UP"
+```
+
+---
+
+### Get API Usage
+```http
+GET /api/v1/market/usage
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/v1/market/usage"
+```
+
+---
+
+### Clear Cache
+```http
+POST /api/v1/market/cache/clear
+```
+
+**Example:**
+```bash
+curl -X POST "http://10.23.137.152:8099/api/v1/market/cache/clear"
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Cache cleared"
+}
+```
+
+---
+
+### Get Cache Stats
+```http
+GET /api/v1/market/cache/stats
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/v1/market/cache/stats"
+```
+
+**Response:**
+```json
+{
+  "cachedQuotes": 42
+}
+```
+
+---
+
+## Client Management Endpoints
+
+### Get All Clients
+```http
+GET /api/clients
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/clients"
+```
+
+**Response:**
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "John Doe",
+    "email": "john@example.com"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "name": "Jane Smith",
+    "email": "jane@example.com"
+  }
+]
+```
+
+---
+
+### Get Client by ID
+```http
+GET /api/clients?clientId={clientId}
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/clients?clientId=550e8400-e29b-41d4-a716-446655440000"
+```
+
+**Response:**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+```
+
+---
+
+### Update Client
+```http
+PUT /api/clients?clientId={clientId}
+Content-Type: application/json
+```
+
+**Example:**
+```bash
+curl -X PUT "http://10.23.137.152:8099/api/clients?clientId=550e8400-e29b-41d4-a716-446655440000" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Jane Doe",
+    "email": "jane@example.com"
+  }'
+```
+
+**Request Body:**
+```json
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Jane Doe",
+  "email": "jane@example.com"
+}
+```
+
+---
+
+## Holdings Endpoints
+
+### Get Client Holdings
+```http
+GET /api/holdings?clientId={clientId}
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/holdings?clientId=550e8400-e29b-41d4-a716-446655440000"
+```
+
+**Response:**
+```json
+[
+  {
+    "clientId": "550e8400-e29b-41d4-a716-446655440000",
+    "symbol": "AAPL",
+    "quantity": "100",
+    "avgBuyPrice": "150.25",
+    "currentValue": "33840"
+  },
+  {
+    "clientId": "550e8400-e29b-41d4-a716-446655440000",
+    "symbol": "MSFT",
+    "quantity": "50",
+    "avgBuyPrice": "300.00",
+    "currentValue": "16500"
+  }
+]
+```
+
+---
+
+## Orders Endpoints
+
+### Get Orders by Client
+```http
+GET /api/orders?clientId={clientId}
+```
+
+**Example:**
+```bash
+curl "http://10.23.137.152:8099/api/orders?clientId=550e8400-e29b-41d4-a716-446655440000"
+```
+
+**Response:**
+```json
+[
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440000",
+    "clientId": "550e8400-e29b-41d4-a716-446655440000",
+    "symbol": "AAPL",
+    "quantity": 100,
+    "orderType": "BUY",
+    "status": "FILLED",
+    "executedAt": "2026-09-28T10:30:00Z"
+  }
+]
+```
+
+---
+
+### Create Transaction Order
+```http
+POST /api/orders/transact
+Content-Type: application/json
+```
+
+**Example:**
+```bash
+curl -X POST "http://10.23.137.152:8099/api/orders/transact" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clientId": "550e8400-e29b-41d4-a716-446655440000",
+    "symbol": "AAPL",
+    "quantity": 100,
+    "transactionType": "BUY"
+  }'
+```
+
+**Request Body:**
+```json
+{
+  "clientId": "550e8400-e29b-41d4-a716-446655440000",
+  "symbol": "AAPL",
+  "quantity": 100,
+  "transactionType": "BUY"
+}
+```
+
+**Response:**
+```json
+{
+  "orderId": "770e8400-e29b-41d4-a716-446655440000",
+  "clientId": "550e8400-e29b-41d4-a716-446655440000",
+  "symbol": "AAPL",
+  "quantity": "100",
+  "transactionType": "BUY",
+  "status": "SUBMITTED",
+  "createdAt": "2026-09-28T20:05:00Z"
+}
+```
+
+---
+
+## Interactive Testing
+
+### Swagger UI
+Access the interactive API documentation at:
+```
+http://10.23.137.152:8099/swagger-ui.html
+```
+
+### OpenAPI Spec
+```
+http://10.23.137.152:8099/v3/api-docs
+```
+
+---
+
+## Angular Service Implementation
+
+### Environment Configuration
+**environment.ts (Development):**
+```typescript
+export const environment = {
+  production: false,
+  apiUrl: 'http://10.23.137.152:8099'
+};
+```
+
+**environment.prod.ts (Production):**
+```typescript
+export const environment = {
+  production: true,
+  apiUrl: 'http://10.23.137.152:8099'
+};
+```
+
+---
+
+### Service Example
+```typescript
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
+
+@Injectable({ providedIn: 'root' })
+export class EATradingService {
+  private apiUrl = environment.apiUrl;
+
+  constructor(private http: HttpClient) {}
+
+  // Market Data
+  getQuote(symbol: string) {
+    return this.http.get(`${this.apiUrl}/api/v1/market/quotes/${symbol}`);
+  }
+
+  getCandles(symbol: string, from?: string, to?: string) {
+    let url = `${this.apiUrl}/api/v1/market/candles/${symbol}`;
+    if (from && to) {
+      url += `?from=${from}&to=${to}`;
+    }
+    return this.http.get(url);
+  }
+
+  getSpread(symbol: string) {
+    return this.http.get(`${this.apiUrl}/api/v1/market/spread/${symbol}`);
+  }
+
+  getChangeMetrics(symbol: string) {
+    return this.http.get(`${this.apiUrl}/api/v1/market/changes/${symbol}`);
+  }
+
+  getCurrentPrice(symbol: string) {
+    return this.http.get(`${this.apiUrl}/api/v1/market/price/${symbol}`);
+  }
+
+  getMarketHealth() {
+    return this.http.get(`${this.apiUrl}/api/v1/market/health`);
+  }
+
+  clearCache() {
+    return this.http.post(`${this.apiUrl}/api/v1/market/cache/clear`, {});
+  }
+
+  getCacheStats() {
+    return this.http.get(`${this.apiUrl}/api/v1/market/cache/stats`);
+  }
+
+  // Client Management
+  getAllClients() {
+    return this.http.get(`${this.apiUrl}/api/clients`);
+  }
+
+  getClientById(clientId: string) {
+    return this.http.get(`${this.apiUrl}/api/clients?clientId=${clientId}`);
+  }
+
+  updateClient(clientId: string, name: string, email: string) {
+    return this.http.put(`${this.apiUrl}/api/clients?clientId=${clientId}`, {
+      name,
+      email
+    });
+  }
+
+  // Holdings
+  getClientHoldings(clientId: string) {
+    return this.http.get(`${this.apiUrl}/api/holdings?clientId=${clientId}`);
+  }
+
+  // Orders
+  getClientOrders(clientId: string) {
+    return this.http.get(`${this.apiUrl}/api/orders?clientId=${clientId}`);
+  }
+
+  createOrder(clientId: string, symbol: string, quantity: number, transactionType: string) {
+    return this.http.post(`${this.apiUrl}/api/orders/transact`, {
+      clientId,
+      symbol,
+      quantity,
+      transactionType
+    });
+  }
+}
+```
+
+---
+
+## Component Usage Examples
+
+### Get Stock Quote
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { EATradingService } from './services/eatrading.service';
+
+@Component({
+  selector: 'app-quote',
+  template: `
+    <div *ngIf="quote">
+      <h2>{{ quote.symbol }}</h2>
+      <p>Price: ${{ quote.price }}</p>
+      <p>Change: {{ quote.change }} ({{ quote.changePercent }}%)</p>
+    </div>
+  `
+})
+export class QuoteComponent implements OnInit {
+  quote: any;
+
+  constructor(private service: EATradingService) {}
+
+  ngOnInit() {
+    this.service.getQuote('AAPL').subscribe(data => {
+      this.quote = data;
+    });
+  }
+}
+```
+
+### Get Candles Chart
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { EATradingService } from './services/eatrading.service';
+
+@Component({
+  selector: 'app-chart',
+  template: `
+    <div *ngIf="candles">
+      <h2>{{ candles.symbol }} - 30 Days</h2>
+      <div *ngFor="let candle of candles.candles">
+        <p>{{ candle.timestamp }}: O:{{ candle.open }} H:{{ candle.high }} L:{{ candle.low }} C:{{ candle.close }}</p>
+      </div>
+    </div>
+  `
+})
+export class ChartComponent implements OnInit {
+  candles: any;
+
+  constructor(private service: EATradingService) {}
+
+  ngOnInit() {
+    this.service.getCandles('AAPL').subscribe(data => {
+      this.candles = data;
+    });
+  }
+}
+```
+
+### Create Order
+```typescript
+import { Component } from '@angular/core';
+import { EATradingService } from './services/eatrading.service';
+
+@Component({
+  selector: 'app-order',
+  template: `
+    <form (ngSubmit)="submitOrder()">
+      <input [(ngModel)]="symbol" placeholder="Symbol" name="symbol" />
+      <input [(ngModel)]="quantity" placeholder="Quantity" name="quantity" type="number" />
+      <select [(ngModel)]="orderType" name="orderType">
+        <option value="BUY">Buy</option>
+        <option value="SELL">Sell</option>
+      </select>
+      <button type="submit">Submit Order</button>
+    </form>
+    <div *ngIf="orderResponse">
+      <p>Order {{ orderResponse.orderId }} submitted!</p>
+    </div>
+  `
+})
+export class OrderComponent {
+  symbol = '';
+  quantity = 0;
+  orderType = 'BUY';
+  orderResponse: any;
+  clientId = '550e8400-e29b-41d4-a716-446655440000'; // Replace with actual client ID
+
+  constructor(private service: EATradingService) {}
+
+  submitOrder() {
+    this.service.createOrder(this.clientId, this.symbol, this.quantity, this.orderType)
+      .subscribe(response => {
+        this.orderResponse = response;
+      });
+  }
+}
+```
+
+---
+
+## Error Handling
+
+### Common HTTP Status Codes
+- `200` - OK: Request successful
+- `201` - Created: Resource created successfully
+- `400` - Bad Request: Invalid parameters
+- `404` - Not Found: Resource not found
+- `500` - Internal Server Error: Server error
+
+### Error Response Format
+```json
+{
+  "error": "Error Message",
+  "message": "Detailed error message",
+  "timestamp": "2026-09-28T20:05:35.506361846Z",
+  "status": 400
+}
+```
+
+---
+
+## Important Notes
+
+✅ **No authentication required** - all endpoints are publicly accessible
+✅ **CORS enabled** - can be called from any origin
+✅ **Real market data** - uses Fauxnance API for market data
+🔄 **Quote caching** - quotes are cached, use `/cache/clear` to refresh
+📊 **30-day default** - candles endpoint defaults to last 30 days if dates not provided
+🚀 **HTTPS ready** - update URLs to https:// for production
+
+---
+
+## Support & Documentation
+
+- **Swagger UI**: http://10.23.137.152:8099/swagger-ui.html
+- **API Docs**: http://10.23.137.152:8099/v3/api-docs
+- **Repository**: /home/ec2-user/ea-trading/EATrading-Backend
