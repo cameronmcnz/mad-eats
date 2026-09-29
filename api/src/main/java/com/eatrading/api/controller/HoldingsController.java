@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,15 +16,10 @@ public class HoldingsController {
 
     /**
      * GET /api/holdings?clientId={clientId}
-     * Get holdings for a specific client - Only accessible for authenticated user's own holdings
+     * Get holdings for a specific client
      */
     @GetMapping
     public ResponseEntity<List<HoldingResponse>> getClientHoldings(@RequestParam String clientId) {
-        // Verify authorization - user can only view their own holdings
-        if (!isAuthorized(clientId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        
         List<HoldingResponse> clientHoldings = new ArrayList<>();
 
         // TODO: Access holdings from the specific client's portfolio
@@ -34,22 +27,6 @@ public class HoldingsController {
         // or a public method to retrieve holdings
         
         return ResponseEntity.ok(clientHoldings);
-    }
-    
-    /**
-     * Helper method to verify user authorization
-     * Returns true if the authenticated user's ID matches the requested clientId
-     */
-    private boolean isAuthorized(String clientId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
-        
-        // Get the authenticated user's principal (assuming it's the user ID)
-        String authenticatedUserId = authentication.getName();
-        return authenticatedUserId.equals(clientId);
     }
 
     // Response DTO

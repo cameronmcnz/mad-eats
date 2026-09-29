@@ -33,6 +33,8 @@ services:
       HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       JPA_DDL_AUTO: update
       SPRINGBOOT_PORT: ${SPRINGBOOT_PORT}
+      FAUXNANCE_API_URL: ${FAUXNANCE_API_URL}
+      FAUXNANCE_API_KEY: ${FAUXNANCE_API_KEY}
     ports:
       - "${SPRINGBOOT_PORT}:${SPRINGBOOT_PORT}"
     depends_on:

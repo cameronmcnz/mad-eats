@@ -5,8 +5,6 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,15 +31,10 @@ public class OrdersController {
 
     /**
      * GET /api/orders?clientId={clientId}
-     * Get orders for a specific client - Only accessible for authenticated user's own orders
+     * Get orders for a specific client
      */
     @GetMapping
     public ResponseEntity<List<Order>> getOrdersByClient(@RequestParam String clientId) {
-        // Verify authorization - user can only view their own orders
-        if (!isAuthorized(clientId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        
         UUID clientUuid = UUID.fromString(clientId);
         List<Order> orders = orderRepository.findByClientId(clientUuid);
         return ResponseEntity.ok(orders);
@@ -49,7 +42,7 @@ public class OrdersController {
 
     /**
      * POST /api/orders/transact
-     * Create a transaction order (BUY or SELL) - Authenticated user can only create orders for themselves
+     * Create a transaction order (BUY or SELL)
      */
     @PostMapping("/transact")
     public ResponseEntity<OrderTransactionResponse> createTransactionOrder(
@@ -57,12 +50,6 @@ public class OrdersController {
         
         try {
             String clientIdString = request.getClientId();
-            
-            // Verify authorization - user can only create orders for themselves
-            if (!isAuthorized(clientIdString)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-            
             UUID clientId = UUID.fromString(clientIdString);
             String transactionType = request.getTransactionType();
 
@@ -91,21 +78,5 @@ public class OrdersController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
-    
-    /**
-     * Helper method to verify user authorization
-     * Returns true if the authenticated user's ID matches the requested clientId
-     */
-    private boolean isAuthorized(String clientId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
-        
-        // Get the authenticated user's principal (assuming it's the user ID)
-        String authenticatedUserId = authentication.getName();
-        return authenticatedUserId.equals(clientId);
     }
 }
