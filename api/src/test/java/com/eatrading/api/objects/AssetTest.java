@@ -34,6 +34,24 @@ class AssetTest {
         assertNotNull(price);
     }
 
+    // ===== EDGE CASES =====
+
+    @Test
+    void testConstructor_AllNullFields() {
+        Asset a = new Asset(null, null, null);
+        assertNull(a.getSymbol());
+        assertNull(a.getName());
+        assertNull(a.getInstrument());
+    }
+
+    // @Test
+    // void testGetCurrMarketPrice_ExactHardcodedValue() {
+    //     Asset a = new Asset("X", "Y", Instrument.CASH);
+    //     BigDecimal price = a.getCurrMarketPrice();
+    //     // exact compare to hardcoded value
+    //     assertEquals(0, price.compareTo(BigDecimal.valueOf(2.0)));
+    // }
+
     // Future tests for API-backed price fetching. Keep commented until API exists.
     /*
     @Test

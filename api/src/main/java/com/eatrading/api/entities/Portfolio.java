@@ -37,8 +37,8 @@ public class Portfolio {
     public Holding findHoldingFromPortfolio(String holdingKey) {
         for (Holding holding : holdings) {
             Asset asset = holding.getAsset();
-            if (asset.getSymbol().equals(holdingKey) || 
-                    asset.getName().equals(holdingKey)) {
+            if (asset != null && (asset.getSymbol().equals(holdingKey) || 
+                    asset.getName().equals(holdingKey))) {
                 return holding;
             }
         }
@@ -49,8 +49,9 @@ public class Portfolio {
         Asset asset = newHolding.getAsset();
         Holding current = this.findHoldingFromPortfolio(asset.getSymbol());
 
-        if (current.getAsset() == null) {
+        if (current == null || current.getAsset() == null) {
             this.holdings.add(newHolding);
+            current = newHolding;
         } else {
             BigDecimal totalShares = current.getQuantity().add(newHolding.getQuantity());
             BigDecimal oldValue = current.getPurchasedValue();
@@ -67,7 +68,7 @@ public class Portfolio {
         Asset asset = removedHolding.getAsset();
         Holding current = this.findHoldingFromPortfolio(asset.getSymbol());
 
-        if (current.getAsset() == null) {
+        if (current == null || current.getAsset() == null) {
             return null;
         }
 

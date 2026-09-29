@@ -435,8 +435,9 @@ class HoldingTest {
         // Get the initial purchased value
         BigDecimal initialPurchasedValue = holding.getPurchasedValue();
 
-        // Now change the market price (no stubbing needed for purchased value)
+        // Now change the market price and update the mock to simulate a live price change
         BigDecimal newMarketPrice = new BigDecimal("200.00");
+        lenient().when(mockAsset.getCurrMarketPrice()).thenReturn(newMarketPrice);
 
         // Act
         BigDecimal stillPurchasedValue = holding.getPurchasedValue();
@@ -444,5 +445,53 @@ class HoldingTest {
         // Assert
         assertEquals(0, initialPurchasedValue.compareTo(stillPurchasedValue), 
             "Purchased value should remain constant (based on construction price)");
+    }
+
+    // ===== EDGE CASES =====
+
+    @Test
+    void testGetCurrentValue_WithNullAsset_ThrowsNPE_Edge() {
+        Holding h = new Holding(null, BigDecimal.ONE);
+        assertThrows(NullPointerException.class, h::getCurrentValue);
+        // TODO: decide whether getCurrentValue should handle null asset and return BigDecimal.ZERO instead.
+    }
+
+    @Test
+    void testGetPurchasedValue_WithNullAvgBuyPrice_ThrowsNPE_Edge() {
+        Holding h = new Holding();
+        h.setQuantity(new BigDecimal("1"));
+        h.setAvgBuyPrice(null);
+        assertThrows(NullPointerException.class, h::getPurchasedValue);
+        // TODO: consider defining expected behaviour for null avgBuyPrice.
+    }
+
+    @Test
+    void testNegativeQuantity_ProducesNegativeValues_Edge() {
+        Asset a = mock(Asset.class);
+        when(a.getCurrMarketPrice()).thenReturn(new BigDecimal("100.00"));
+        BigDecimal negativeQty = new BigDecimal("-10");
+        Holding h = new Holding(a, negativeQty);
+        BigDecimal expected = negativeQty.multiply(new BigDecimal("100.00"));
+        assertEquals(0, expected.compareTo(h.getCurrentValue()));
+        assertEquals(0, expected.compareTo(h.getPurchasedValue()));
+        //TODO: see if we want this implementation if quantity is negative (exception should probably be thrown)
+    }
+
+    @Test
+    void testAssetMarketPriceReturnsNull_ThrowsNPEOnGetCurrentValue_Edge() {
+        when(mockAsset.getCurrMarketPrice()).thenReturn(null);
+        Holding h = new Holding(mockAsset, new BigDecimal("1"));
+        // asset.getCurrMarketPrice() being null will cause multiply(null) -> NPE
+        assertThrows(NullPointerException.class, h::getCurrentValue);
+        // TODO: decide if Asset price null should be treated as zero or cause a specific exception.
+    }
+
+    @Test
+    void testHighPrecisionMultiplication_PreservesValue_Edge() {
+        when(mockAsset.getCurrMarketPrice()).thenReturn(new BigDecimal("0.00000001"));
+        BigDecimal qty = new BigDecimal("0.00000002");
+        Holding h = new Holding(mockAsset, qty);
+        BigDecimal expected = qty.multiply(new BigDecimal("0.00000001"));
+        assertEquals(0, expected.compareTo(h.getCurrentValue()));
     }
 }
