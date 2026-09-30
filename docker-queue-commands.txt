@@ -38,3 +38,25 @@ Change 10.23.131.137 to your IP both here and in application.properties
 docker exec kafka /opt/kafka/bin/kafka-topics.sh --create \
   --topic orders.unprocessed --bootstrap-server 10.23.131.137:9092 \
   --partitions 1 --replication-factor 1
+
+
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-kafka</artifactId>
+</dependency>
+
+Change 10.23.131.137 to your IP both here and in application.properties
+  
+#spring.kafka.bootstrap-servers=10.23.131.137:9092
+spring.kafka.bootstrap-servers=127.0.0.1:9092
+
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+
+spring.kafka.consumer.group-id=order-consumers
+spring.kafka.consumer.auto-offset-reset=earliest
+spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.JsonDeserializer
+spring.kafka.consumer.properties.spring.json.trusted.packages=com.eatrading.api.dto
+spring.kafka.consumer.properties.spring.json.value.default.type=com.eatrading.api.dto.OrderTransactionRequest
