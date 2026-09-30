@@ -16,13 +16,13 @@ public class FauxnanceClient {
     
     private static final Logger logger = LoggerFactory.getLogger(FauxnanceClient.class);
     
-    @Value("${fauxnance.api.url}")
+    @Value("http://localhost")
     private String apiUrl;
     
-    @Value("${fauxnance.api.key}")
+    @Value("aaaa")
     private String apiKey;
     
-    @Value("${fauxnance.api.timeout:10000}")
+    @Value("1000")
     private int timeout;
     
     private final WebClient webClient;
