@@ -1,3 +1,9 @@
+Change 10.23.131.137 to your IP both here and in application.properties
+
+to delete the kafka container if it exists or you mess it up:
+
+docker rm kafka
+
 docker run -d --name kafka -p 10.23.131.137:9092:9092 \
   -e KAFKA_NODE_ID=1 \
   -e KAFKA_PROCESS_ROLES=broker,controller \
@@ -12,16 +18,23 @@ docker run -d --name kafka -p 10.23.131.137:9092:9092 \
   -e KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1 \
   -e CLUSTER_ID=4L6g3nShT-eMCtK--X86sw \
   apache/kafka:latest
+
+
+Change 10.23.131.137 to your IP both here and in application.properties
   
-  
-  MSYS_NO_PATHCONV=1 docker exec kafka /opt/kafka/bin/kafka-topics.sh --create \
+docker exec kafka /opt/kafka/bin/kafka-topics.sh --create \
   --topic orders.incoming --bootstrap-server 10.23.131.137:9092 \
   --partitions 1 --replication-factor 1
   
-    MSYS_NO_PATHCONV=1 docker exec kafka /opt/kafka/bin/kafka-topics.sh --create \
+Change 10.23.131.137 to your IP both here and in application.properties
+
+
+docker exec kafka /opt/kafka/bin/kafka-topics.sh --create \
   --topic orders.unvalidated --bootstrap-server 10.23.131.137:9092 \
   --partitions 1 --replication-factor 1
+
+Change 10.23.131.137 to your IP both here and in application.properties
   
-      MSYS_NO_PATHCONV=1 docker exec kafka /opt/kafka/bin/kafka-topics.sh --create \
+docker exec kafka /opt/kafka/bin/kafka-topics.sh --create \
   --topic orders.unprocessed --bootstrap-server 10.23.131.137:9092 \
   --partitions 1 --replication-factor 1
