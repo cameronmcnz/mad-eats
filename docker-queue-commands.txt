@@ -1,4 +1,4 @@
-docker run -d --name kafka -p http://10.23.131.137:9092:9092 \
+docker run -d --name kafka -p 10.23.131.137:9092:9092 \
   -e KAFKA_NODE_ID=1 \
   -e KAFKA_PROCESS_ROLES=broker,controller \
   -e KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093 \
